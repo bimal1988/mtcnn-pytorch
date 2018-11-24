@@ -1,6 +1,7 @@
 import numpy as np
 from PIL import Image
 
+
 def nms(boxes, overlap_threshold=0.5, mode='union'):
     """ Pure Python NMS baseline. """
     x1 = boxes[:, 0]
@@ -73,7 +74,8 @@ def get_image_boxes(bounding_boxes, img, size=24):
     num_boxes = len(bounding_boxes)
     width, height = img.size
 
-    [dy, edy, dx, edx, y, ey, x, ex, w, h] = correct_bboxes(bounding_boxes, width, height)
+    [dy, edy, dx, edx, y, ey, x, ex, w, h] = correct_bboxes(
+        bounding_boxes, width, height)
     img_boxes = np.zeros((num_boxes, 3, size, size), 'float32')
 
     for i in range(num_boxes):

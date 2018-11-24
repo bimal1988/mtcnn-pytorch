@@ -5,9 +5,10 @@ import torch
 from .model import PNet, RNet, ONet
 from .box_utils import nms, calibrate_box, get_image_boxes, convert_to_square, _preprocess
 
-def detect_faces(image, min_face_size=20.0, thresholds=[0.6, 0.7, 0.8],
+
+def detect_faces(image, min_face_size=20.0, thresholds=[0.7, 0.8, 0.9],
                  nms_thresholds=[0.7, 0.7, 0.7]):
-    pnet, rnet, onet= PNet(), RNet(), ONet()
+    pnet, rnet, onet = PNet(), RNet(), ONet()
     onet.eval()
 
     width, height = image.size
@@ -35,7 +36,8 @@ def detect_faces(image, min_face_size=20.0, thresholds=[0.6, 0.7, 0.8],
 
     keep = nms(bounding_boxes[:, 0:5], nms_thresholds[0])
     bounding_boxes = bounding_boxes[keep]
-    bounding_boxes = calibrate_box(bounding_boxes[:, 0:5], bounding_boxes[:, 5:])
+    bounding_boxes = calibrate_box(
+        bounding_boxes[:, 0:5], bounding_boxes[:, 5:])
     bounding_boxes = convert_to_square(bounding_boxes)
     bounding_boxes[:, 0:4] = np.round(bounding_boxes[:, 0:4])
 
@@ -59,7 +61,7 @@ def detect_faces(image, min_face_size=20.0, thresholds=[0.6, 0.7, 0.8],
 
     # STAGE 3
     img_boxes = get_image_boxes(bounding_boxes, image, size=48)
-    if len(img_boxes) == 0: 
+    if len(img_boxes) == 0:
         return [], []
     img_boxes = torch.FloatTensor(img_boxes)
     output = onet(img_boxes)
@@ -77,8 +79,10 @@ def detect_faces(image, min_face_size=20.0, thresholds=[0.6, 0.7, 0.8],
     width = bounding_boxes[:, 2] - bounding_boxes[:, 0] + 1.0
     height = bounding_boxes[:, 3] - bounding_boxes[:, 1] + 1.0
     xmin, ymin = bounding_boxes[:, 0], bounding_boxes[:, 1]
-    landmarks[:, 0:5] = np.expand_dims(xmin, 1) + np.expand_dims(width, 1)*landmarks[:, 0:5]
-    landmarks[:, 5:10] = np.expand_dims(ymin, 1) + np.expand_dims(height, 1)*landmarks[:, 5:10]
+    landmarks[:, 0:5] = np.expand_dims(
+        xmin, 1) + np.expand_dims(width, 1)*landmarks[:, 0:5]
+    landmarks[:, 5:10] = np.expand_dims(
+        ymin, 1) + np.expand_dims(height, 1)*landmarks[:, 5:10]
 
     bounding_boxes = calibrate_box(bounding_boxes, offsets)
     keep = nms(bounding_boxes, nms_thresholds[2], mode='min')
@@ -86,6 +90,7 @@ def detect_faces(image, min_face_size=20.0, thresholds=[0.6, 0.7, 0.8],
     landmarks = landmarks[keep]
 
     return bounding_boxes, landmarks
+
 
 def run_first_stage(image, net, scale, threshold):
     """ 
